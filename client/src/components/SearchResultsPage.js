@@ -22,7 +22,7 @@ function SearchResultsPage() {
     setLoading(true);
     try {
     //here is where the API for the data base will be
-      const response = await fetch(`https://api.example.com/search?q=${query}`); 
+      const response = await fetch(`http://localhost:5000/api/search?q=${query}`); 
       const data = await response.json();
       setResults(data.results);
     } catch (error) {
@@ -71,8 +71,8 @@ function SearchResultsPage() {
         ) : results.length > 0 ? (
           results.map((result, index) => (
             <div key={index} className="result-item">
-              <h3>{result.title}</h3>
-              <p>{result.description}</p>
+              <h3>{result.serviceName}</h3>
+              <p>{result.location}</p>
             </div>
           ))
         ) : (
