@@ -1,40 +1,90 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import './UserProfile.css';
 import placeholderPic from "../images/ProfilePlaceHolder.svg";
 
+import axios from "axios";
 
-const initialUser = {
-  username: "johndoe",
-  email: "john@example.com",
-  mobileNumber: "+1234567890",
-  userType: "ServiceProvider",
-  serviceType: "Plumbing",
-  serviceName: "John's Plumbing Services",
-  location: "New York, NY",
-  resume: "john_doe_resume.pdf",
-  availableDays: ["Monday", "Wednesday", "Friday"],
-  startTime: "09:00",
-  endTime: "17:00",
-  price: 50,
-  languages: ["English", "Spanish"],
-};
+// Fetching User detail
 
-const UserProfile = () => {
-  const [user, setUser] = useState(initialUser);
+// const initialUser = {
+//   username: "johndoe",
+//   email: "john@example.com",
+//   mobileNumber: "+1234567890",
+//   userType: "ServiceProvider",
+//   serviceType: "Plumbing",
+//   serviceName: "John's Plumbing Services",
+//   location: "New York, NY",
+//   resume: "john_doe_resume.pdf",
+//   availableDays: ["Monday", "Wednesday", "Friday"],
+//   startTime: "09:00",
+//   endTime: "17:00",
+//   price: 50,
+//   languages: ["English", "Spanish"],
+// };
+
+
+// const UserProfile = () => {
+//   const [user, setUser] = useState(initialUser);
+//   const [isEditing, setIsEditing] = useState(false);
+
+//   const handleEdit = () => setIsEditing(true);
+//   const handleCancel = () => setIsEditing(false);
+//   const handleSave = (editedUser) => {
+//     setUser(editedUser);
+//     setIsEditing(false);
+//     //  send the updated user data to backend
+//   };
+//   const handleDelete = () => {
+//     // Implement delete functionality here
+//     console.log("Delete profile");
+//     // send a delete request to backend
+//   };
+
+// Fetching User detail
+const UserProfile = ({ userId }) => {
+  const [user, setUser] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const response = await axios.get('http://localhost:5001/api/user/${userId}');
+        setUser(response.data);
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+      }
+    };
+    fetchUserData();
+  }, [userId]);
 
   const handleEdit = () => setIsEditing(true);
   const handleCancel = () => setIsEditing(false);
-  const handleSave = (editedUser) => {
-    setUser(editedUser);
-    setIsEditing(false);
-    //  send the updated user data to backend
+
+  const handleSave = async (editedUser) => {
+    try {
+      const response = await axios.put('http://localhost:5001/api/update/${userId}', editedUser);
+      setUser(response.data);
+      setIsEditing(false);
+      alert("Profile updated successfully!");
+    } catch (error) {
+      console.error("Error updating user profile:", error);
+      alert("Failed to update profile.");
+    }
   };
-  const handleDelete = () => {
-    // Implement delete functionality here
-    console.log("Delete profile");
-    // send a delete request to backend
+
+  const handleDelete = async () => {
+    try {
+      await axios.delete('http://localhost:5001/api/update/${userId}');
+      alert("Profile deleted successfully!");
+    } catch (error) {
+      console.error("Error deleting profile:", error);
+      alert("Failed to delete profile.");
+    }
   };
+
+  if (!user) {
+    return <div>Loading.....</div>
+  }
 
   return (
     <div className="user-profile">

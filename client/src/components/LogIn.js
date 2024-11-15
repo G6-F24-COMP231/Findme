@@ -1,4 +1,5 @@
 import React, { useRef, useState } from "react";
+import axios from 'axios';
 // import emailjs from "@emailjs/browser";
 
 const Login = () => {
@@ -9,6 +10,7 @@ const Login = () => {
   });
 
   const [errors, setErrors] = useState({});
+  const [loginError, setLoginError] = useState("");
 
   const validateForm = () => {
     const newErrors = {};
@@ -25,11 +27,24 @@ const Login = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
     if (validateForm()) {
       console.log("Login successful");
-      // Perform login functionality
+      
+      try {
+        const response = await axios.post("http://localhost:5001/api/login", formData);
+        
+        localStorage.setItem("token", response.data.token);
+        localStorage.setItem("user", JSON.stringify(response.data));
+
+        console.log("Login successful: ", response.data.user);
+        window.location.href = "/UserProfile";
+        
+      } catch (error) {
+        console.error("Login failed:", error.response?.data?.message || error.message);
+        setLoginError(error.response?.data?.message || "Something went wrong. PLease try again.");
+      }
     }
   };
 
