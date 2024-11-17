@@ -1,30 +1,20 @@
-import React, { useRef, useState } from "react";
-import axios from 'axios'
-import { useNavigate } from 'react-router-dom';
-// import emailjs from "@emailjs/browser";
+import React, { useState, useContext } from "react";
+import { useNavigate } from "react-router-dom";
+import { AuthContext } from "../context/AuthContext"; // Make sure this path is correct
 
 const Login = () => {
-  const form = useRef();
   const [formData, setFormData] = useState({
     username: "",
     password: "",
   });
-
-   const navigate = useNavigate();
-
-  const [message, setMessage] = useState('');
-
   const [errors, setErrors] = useState({});
-
-  const [user, setUser] = useState(null);
+  const navigate = useNavigate();
+  const { login } = useContext(AuthContext);
 
   const validateForm = () => {
     const newErrors = {};
     if (!formData.username) newErrors.username = "Username is required";
     if (!formData.password) newErrors.password = "Password is required";
-    else if (formData.password.length < 6)
-      newErrors.password = "Password must be at least 6 characters";
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -37,15 +27,25 @@ const Login = () => {
     e.preventDefault();
     if (validateForm()) {
       try {
-        const response = await axios.post('http://localhost:5001/api/login', { 
-          username: formData.username,
-          password: formData.password
-           });
-        setMessage(response.data.message);
-        setUser(response.data.user);
-        navigate('/');
+        const response = await fetch("http://localhost:5001/api/users/login", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(formData),
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          login(data); // Update AuthContext
+          navigate("/"); // Redirect to home page
+        } else {
+          const errorData = await response.json();
+          setErrors({ form: errorData.message });
+        }
       } catch (error) {
-          setMessage(error.response.data.message || 'Error logging in');
+        console.error("Error:", error);
+        setErrors({ form: "An error occurred during login." });
       }
     }
   };
@@ -53,7 +53,7 @@ const Login = () => {
   return (
     <div style={styles.container}>
       <h3>Login</h3>
-      <form ref={form} onSubmit={handleLogin} className="login-form">
+      <form onSubmit={handleLogin} className="login-form">
         <div style={styles.formGroup}>
           <label>Username</label>
           <input
@@ -80,16 +80,16 @@ const Login = () => {
           {errors.password && <p style={styles.error}>{errors.password}</p>}
         </div>
 
+        {errors.form && <p style={styles.error}>{errors.form}</p>}
+
         <button type="submit" style={styles.button}>
           Login
         </button>
       </form>
       <p style={styles.signupText}>
-        Don’t have an account? <a href="/signup">Sign Up</a>
+        Don't have an account? <a href="/signup">Sign Up</a>
       </p>
-      {message && <div style={{ color: message.includes('successful') ? 'green' : 'red' }}>{message}</div>}
     </div>
-    
   );
 };
 

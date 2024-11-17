@@ -1,12 +1,13 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import { AuthContext } from "../context/AuthContext"; // Make sure this path is correct
 import "./Homepage.css";
 
 function HomePage() {
   const [query, setQuery] = useState("");
-  const [services, setServices] = useState([]); // State to store services data
-  const [maxPrice, setMaxPrice] = useState('');
+  const [services, setServices] = useState([]);
   const navigate = useNavigate();
+  const { isAuthenticated, logout } = useContext(AuthContext);
 
   useEffect(() => {
     // Simulate fetching data from an API
@@ -44,7 +45,6 @@ function HomePage() {
           languages: ["English"],
           pricePerHour: 25,
         },
-        // Add more demo services as needed
       ];
 
       setServices(demoServices);
@@ -54,13 +54,12 @@ function HomePage() {
   }, []);
 
   const handleSearch = () => {
-    // Redirect to search results page, passing the query as a URL parameter
-
-    // const url = maxPrice ? `/search-results?q=${query}&maxPrice=${maxPrice}` : `/search-results?q=${query}`;
-    // console.log()
-    // navigate(url);
-
     navigate(`/search-results?q=${query}`);
+  };
+
+  const handleLogout = () => {
+    logout();
+    navigate("/");
   };
 
   return (
@@ -72,29 +71,29 @@ function HomePage() {
       <nav>
         <Link to="/">Home</Link>
         <Link to="/why-find-me">Why Find Me</Link>
-        <Link to="/listofservices">Find Talent</Link>
+        <Link to="/find-talent">Find Talent</Link>
         <Link to="/contact">Contact</Link>
-        <Link to="/signup">Sign Up</Link>
-        <Link to="/login">Login</Link>
-        <Link to="/profile">Profile</Link>
+        {isAuthenticated ? (
+          <>
+            <Link to="/profile">Profile</Link>
+            <button onClick={handleLogout}>Logout</button>
+          </>
+        ) : (
+          <>
+            <Link to="/signup">Sign Up</Link>
+            <Link to="/login">Login</Link>
+          </>
+        )}
       </nav>
       <div className="body_container">
         {/* Search Bar */}
         <div className="search-bar">
-          <input type="text" placeholder="Search services by keyword" value={query} onChange={(e) => setQuery(e.target.value)} />
-          {/* <select>
-            <option value="">Filter</option>
-            <option value="option">#Option#</option>
-          </select> */}
-
-          {/* <select value={maxPrice} onChange={(e) => setMaxPrice(e.target.value)}>
-            <option value="">Max Price</option>
-            <option value="25">25/hour</option>
-            <option value="35">35/hour</option>
-            <option value="45">45/hour</option>
-            <option value="60">60/hour</option>
-          </select> */}
-
+          <input
+            type="text"
+            placeholder="Search services by keyword"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+          />
           <button type="button" onClick={handleSearch}>
             Search
           </button>
@@ -107,7 +106,14 @@ function HomePage() {
             {services.length > 0 ? (
               <div className="service-list">
                 {services.map((service) => (
-                  <ServiceCard key={service.id} id={service.id} title={service.title} location={service.location} languages={service.languages} pricePerHour={service.pricePerHour} />
+                  <ServiceCard
+                    key={service.id}
+                    id={service.id}
+                    title={service.title}
+                    location={service.location}
+                    languages={service.languages}
+                    pricePerHour={service.pricePerHour}
+                  />
                 ))}
               </div>
             ) : (

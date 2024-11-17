@@ -1,5 +1,6 @@
 const bcrypt = require('bcryptjs');
 const User = require('../User');
+const jwt = require('jsonwebtoken');  
 
 // @desc    Register new user
 // @route   POST /api/users/signup
@@ -88,34 +89,37 @@ exports.registerUser = async (req, res) => {
 };
 
 exports.loginUser = async (req, res) => {
-  console.log("Start logging");
-  const { username, password } = req.body;
-
   try {
-    console.log('Login attempt:', username, password);
-        // Find user by userName
-        const user = await User.findOne({ username });
-    if (!user) {
-          console.log('User not found');
-            return res.status(404).json({ message: 'User not found' });
-    }
-        // Compare passwords
-    const isMatch = await bcrypt.compare(password, user.password);
-    console.log('Password Match:', isMatch);
-        if (!isMatch) {
-            return res.status(400).json({ message: 'Invalid credentials' });
-        }
+    const { username, password } = req.body;
 
-        // Respond with success
-    res.status(200).json({
-      message: 'Login successful', user: {
+    // Check for user
+    const user = await User.findOne({ username });
+    if (!user) {
+      return res.status(400).json({ message: 'Invalid credentials' });
+    }
+
+    // Check password
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ message: 'Invalid credentials' });
+    }
+
+    // Create token
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+      expiresIn: '1h',
+    });
+
+    res.json({
+      token,
+      user: {
         id: user._id,
         username: user.username,
         email: user.email,
-      }  
-         });
+        userType: user.userType,
+      },
+    });
   } catch (error) {
-    console.error('Server Error:', error);
-        res.status(500).json({ message: 'Server error', error });
-    }
-}
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};

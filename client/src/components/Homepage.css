@@ -17,7 +17,14 @@ nav {
   padding: 10px;
   text-align: center;
 }
-
+nav button{
+  padding: 10px 20px;
+  background-color: #c03939;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  border-radius: 5px;
+}
 nav a {
   color: #fff;
   margin: 0 10px;

@@ -3,40 +3,26 @@ const User = require('../User');
 
 exports.updateUser = async (req, res) => {
     try {
-        const userId = req.params.id;
-        const { username, password, mobileNumber, languages } = req.body;
-
-        const user = await User.findById(userId);
-        if (!user) {
-            return res.status(404).json({message: 'User not found'});
+      const user = await User.findById(req.user.id);
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+  
+      // Update user fields
+      const fieldsToUpdate = ['username', 'email', 'mobileNumber', 'serviceType', 'serviceName', 'location', 'availableDays', 'startTime', 'endTime', 'price', 'languages'];
+      fieldsToUpdate.forEach(field => {
+        if (req.body[field] !== undefined) {
+          user[field] = req.body[field];
         }
-
-        if (username) user.username = username;
-        if (mobileNumber) user.mobileNumber = mobileNumber;
-        if (languages) user.languages = languages;
-
-        if (password) {
-            const salt = await bcrypt.genSalt(10);
-            user.password = await bcrypt.hash(password, salt);
-        }
-
-        await user.save();
-
-        res.status(200).json({
-            message: 'User updated successfully',
-            user: {
-                username: user.username,
-                mobileNumber: user.mobileNumber,
-                languages: user.languages,
-                userType: user.userType,
-                location: user.location
-            },
-        });
+      });
+  
+      await user.save();
+      res.json(user);
     } catch (error) {
-        console.error('Error updating user: ', error);
-        res.status(500).json({message: 'Server error'});
-    } 
-};
+      console.error('Error in updateUserProfile:', error);
+      res.status(500).json({ message: 'Server error' });
+    }
+  };
 
 
 // Connecting to the update form

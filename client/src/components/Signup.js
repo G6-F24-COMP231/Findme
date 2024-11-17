@@ -1,10 +1,12 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useContext  } from "react";
 import { useNavigate } from "react-router-dom"; // Import useNavigate from react-router-dom
 import emailjs from "@emailjs/browser";
+import { AuthContext } from "../context/AuthContext";
 
 const Signup = () => {
   const form = useRef();
-  const navigate = useNavigate(); // Initialize navigate hook
+  const navigate = useNavigate();
+  const { login } = useContext(AuthContext);
   const [formData, setFormData] = useState({
     username: "",
     email: "",
@@ -60,8 +62,7 @@ const Signup = () => {
     console.log("inside sendEmail");
     if (validateForm()) {
       try {
-        //console.log("submit successful");
-        const response = await fetch('http://localhost:5001/api/signup', {
+        const response = await fetch('http://localhost:5001/api/users/signup', {
           method: 'POST',
           headers: {
             "Content-Type": "application/json",
@@ -70,7 +71,44 @@ const Signup = () => {
         });
 
         if (response.ok) {
+          const data = await response.json();
           alert("Signup successful!");
+          
+          // Automatically log in the user
+          const loginResponse = await fetch('http://localhost:5001/api/users/login', {
+            method: 'POST',
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              username: formData.username,
+              password: formData.password,
+            }),
+          });
+
+          if (loginResponse.ok) {
+            const loginData = await loginResponse.json();
+            login(loginData); // Update AuthContext
+            navigate("/"); // Redirect to home page
+          } else {
+            console.error("Auto-login failed after signup");
+          }
+
+          emailjs
+            .sendForm("service_debeiyt", "template_4wzuql7", form.current, {
+              publicKey: "9B_G4UOwgNSsEHZiJ",
+            })
+            .then(
+              () => {
+                console.log("SUCCESS!");
+                alert("Email sent successfully!");
+              },
+              (error) => {
+                console.log("FAILED...", error.text);
+                alert("Email confirmation Failed...", error.text);
+              }
+            );
+
           setFormData({
             username: "",
             email: "",
@@ -88,24 +126,6 @@ const Signup = () => {
             price: "",
             languages: [],
           });
-
-          emailjs
-            .sendForm("service_debeiyt", "template_4wzuql7", form.current, {
-              publicKey: "9B_G4UOwgNSsEHZiJ",
-            })
-            .then(
-              () => {
-                console.log("SUCCESS!");
-                alert("Email sent successfully!");
-              },
-              (error) => {
-                console.log("FAILED...", error.text);
-                alert("Email confirmation Failed...", error.text);
-              }
-            );
-
-          // Navigate to homepage after successful signup
-          navigate("/"); // Navigating to the homepage route ("/")
         } else {
           alert("Failed to sign up");
         }
@@ -115,6 +135,7 @@ const Signup = () => {
       }
     }
   };
+
 
   return (
     <div style={styles.container}>
