@@ -4,6 +4,8 @@ const cors = require('cors');
 const User = require('../User'); // Import the user model
 const userRoutes = require('../routes/userRoutes');
 const Service = require('../models/Service');
+const bookingRoutes = require('../routes/bookingRoutes');
+
 //const serviceRoutes = require('../routes/serviceRoutes');
 
 require('dotenv').config();
@@ -73,7 +75,7 @@ app.post('/api/users/:id/services', async (req, res) => {
 
     await user.save();
 
-    
+
     res.status(201).json({ message: 'Service added successfully', user });
   } catch (error) {
     console.error('Error adding service:', error);
@@ -97,6 +99,7 @@ app.get('/api/services/:serviceId', async (req, res) => {
 
 app.use('/api', userRoutes);
 app.use('/api/services', userRoutes);
+app.use('/api/bookings', bookingRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);

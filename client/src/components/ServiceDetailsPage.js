@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import "./ServiceDetailsPage.css";
+import { UserContext } from './../UserContext';
 import axios from 'axios';
 
 // Import Font Awesome
@@ -19,90 +20,71 @@ function ServiceDetailsPage() {
     expiryDate: "",
     cvv: "",
   });
-
+  const { user } = useContext(UserContext); // Get the logged-in user's info
   const pricePerHour = serviceData ? serviceData.pricePerHour : 0; // Use the price from fetched data
 
   useEffect(() => {
-    // Simulate fetching data from backend
+    // Fetch service data from backend
     const fetchServiceData = async () => {
-      // Simulate an API call delay
-      //await new Promise((resolve) => setTimeout(resolve, 500));
-
-      // Demo data
-      // const demoData = {
-      //   id: serviceId,
-      //   title: "Baby Sitter",
-      //   providerFirstName: "John",
-      //   providerLastName: "Doe",
-      //   location: "New York, NY",
-      //   languages: ["English", "Spanish"],
-      //   availableDays: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
-      //   startTime: "09:00 AM",
-      //   endTime: "05:00 PM",
-      //   pricePerHour: 50,
-      //   resumeUrl: "resume.pdf",
-      // };
-
-      // setServiceData(demoData);
-
       try {
-        console.log(serviceId);
         const response = await axios.get(`http://localhost:5001/api/services/${serviceId}`);
-        console.log(response.data);
         setServiceData(response.data);
       } catch (error) {
         console.error("Error fetching service data:", error);
         alert("Failed to load service data.");
       }
-  
     };
 
     fetchServiceData();
   }, [serviceId]);
 
   const handleDaySelection = (day) => {
-    if (selectedDays.includes(day)) {
-      // Remove day
-      setSelectedDays((prevDays) => prevDays.filter((d) => d !== day));
-      setDayTimes((prevTimes) => {
-        const newTimes = { ...prevTimes };
-        delete newTimes[day];
-        return newTimes;
-      });
+    const isSelected = selectedDays.includes(day);
+    const updatedSelectedDays = isSelected
+      ? selectedDays.filter((d) => d !== day)
+      : [...selectedDays, day];
+
+    setSelectedDays(updatedSelectedDays); // Update the state first
+
+    const updatedDayTimes = { ...dayTimes };
+    if (isSelected) {
+      delete updatedDayTimes[day];
     } else {
-      // Add day with default times
-      setSelectedDays((prevDays) => [...prevDays, day]);
-      setDayTimes((prevTimes) => ({
-        ...prevTimes,
-        [day]: {
-          startTime: "09:00",
-          endTime: "17:00",
-        },
-      }));
+      updatedDayTimes[day] = {
+        startTime: "09:00",
+        endTime: "17:00",
+      };
     }
+
+    setDayTimes(updatedDayTimes);
+    calculateSubtotal(updatedSelectedDays, updatedDayTimes); // Call calculation with updated values
   };
 
   const handleTimeChange = (day, timeType, value) => {
-    setDayTimes((prevTimes) => ({
-      ...prevTimes,
+    const updatedDayTimes = {
+      ...dayTimes,
       [day]: {
-        ...prevTimes[day],
+        ...dayTimes[day],
         [timeType]: value,
       },
-    }));
+    };
+
+    setDayTimes(updatedDayTimes);
+    calculateSubtotal(selectedDays, updatedDayTimes); // Pass latest states for calculation
   };
+
+
 
   const getTimeInHours = (timeStr) => {
     const [hours, minutes] = timeStr.split(":").map(Number);
     return hours + minutes / 60;
   };
 
-  useEffect(() => {
+  const calculateSubtotal = (updatedSelectedDays, updatedDayTimes) => {
+    if (!serviceData || !pricePerHour) return;
 
-    if (!serviceData || !price) return;
-
-    const totalHours = selectedDays.reduce((sum, day) => {
-      const times = dayTimes[day];
+    const totalHours = updatedSelectedDays.reduce((sum, day) => {
+      const times = updatedDayTimes[day];
       if (times && times.startTime && times.endTime) {
         const start = getTimeInHours(times.startTime);
         const end = getTimeInHours(times.endTime);
@@ -112,27 +94,55 @@ function ServiceDetailsPage() {
         return sum;
       }
     }, 0);
-    setSubtotal(totalHours * price);
-  }, [selectedDays, dayTimes, pricePerHour]);
+
+    setSubtotal(totalHours * pricePerHour);
+  };
 
   const handlePaymentChange = (e) => {
     setPaymentInfo({ ...paymentInfo, [e.target.name]: e.target.value });
   };
 
-  const handlePay = () => {
-    alert("Payment Successful!");
-    // Reset form
-    setSelectedDays([]);
-    setDayTimes({});
-    setSubtotal(0);
-    setPaymentInfo({ cardNumber: "", expiryDate: "", cvv: "" });
+  const handlePay = async () => {
+    const serviceSeekerId = user ? user.id : null;
+    if (!serviceSeekerId) {
+      alert("You need to be logged in to book a service.");
+      return;
+    }
+
+    const serviceProviderId = serviceData ? serviceData.serviceProviderId : null;
+    if (!serviceProviderId) {
+      alert("Service provider information is missing.");
+      return;
+    }
+
+    const bookingDetails = {
+      serviceId,
+      serviceSeekerId,
+      serviceProviderId,
+      selectedDays,
+      dayTimes,
+      subtotal,
+      paymentInfo,
+    };
+
+    try {
+      await axios.post('http://localhost:5001/api/bookings/create-booking', bookingDetails);
+      alert("Payment Successful!");
+      setSelectedDays([]);
+      setDayTimes({});
+      setSubtotal(0);
+      setPaymentInfo({ cardNumber: "", expiryDate: "", cvv: "" });
+    } catch (error) {
+      console.error("Error processing payment:", error);
+      alert("Failed to process payment.");
+    }
   };
 
   if (!serviceData) {
     return <div>Loading...</div>;
   }
 
-  const { title, username,/*providerFirstName, providerLastName,*/ location, languages, availableDays, startTime, endTime, resumeUrl, price } = serviceData;
+  const { title, username, location, languages, availableDays, startTime, endTime, resumeUrl, price } = serviceData || {};
 
   return (
     <div className="service-details">
@@ -144,33 +154,33 @@ function ServiceDetailsPage() {
         <div className="profile-header">
           <div className="profile-avatar">
             <span className="initials">
-              {/* {providerFirstName.charAt(0)}
-              {providerLastName.charAt(0)} */}
-              {username.charAt(0)}
+              {username ? username.charAt(0) : ""}
             </span>
           </div>
           <div className="profile-info">
             <h2>{title}</h2>
             <p className="service-type">
-              <FontAwesomeIcon icon={faPerson} /> {username}{/*{providerFirstName} {providerLastName}*/}
+              <FontAwesomeIcon icon={faPerson} /> {username}
             </p>
             <p className="location">
               <FontAwesomeIcon icon={faMapMarkerAlt} /> {location}
             </p>
           </div>
         </div>
-        <a href={resumeUrl} download className="download-resume">
-          <FontAwesomeIcon icon={faFileDownload} /> Download Resume
-        </a>
+        {resumeUrl && (
+          <a href={resumeUrl} download className="download-resume">
+            <FontAwesomeIcon icon={faFileDownload} /> Download Resume
+          </a>
+        )}
         <div className="profile-details">
           <p>
-            <FontAwesomeIcon icon={faLanguage} /> <strong>Languages:</strong> {languages.join(", ")}
+            <FontAwesomeIcon icon={faLanguage} /> <strong>Languages:</strong> {languages && languages.join(", ")}
           </p>
           <p>
             <FontAwesomeIcon icon={faCalendarAlt} /> <strong>Available Days:</strong>
           </p>
           <div className="days">
-            {availableDays.map((day) => (
+            {availableDays && availableDays.map((day) => (
               <span key={day} className="day">
                 {day}
               </span>
@@ -193,7 +203,7 @@ function ServiceDetailsPage() {
         <div className="form-group">
           <label>Select Days:</label>
           <div className="days-select">
-            {availableDays.map((day) => (
+            {availableDays && availableDays.map((day) => (
               <label key={day} className="checkbox-label">
                 <input type="checkbox" value={day} checked={selectedDays.includes(day)} onChange={() => handleDaySelection(day)} />
                 <span className="custom-checkbox">
@@ -206,48 +216,48 @@ function ServiceDetailsPage() {
         </div>
 
         {selectedDays.length > 0 && (
-          <div className="time-inputs">
-            {selectedDays.map((day) => (
-              <div key={day} className="time-selection">
-                <h4>{day}</h4>
-                <div className="time-group">
-                  <label>Start Time:</label>
-                  <input type="time" value={dayTimes[day]?.startTime || ""} onChange={(e) => handleTimeChange(day, "startTime", e.target.value)} />
+          <>
+            <div className="time-inputs">
+              {selectedDays.map((day) => (
+                <div key={day} className="time-selection">
+                  <h4>{day}</h4>
+                  <div className="time-group">
+                    <label>Start Time:</label>
+                    <input type="time" value={dayTimes[day]?.startTime || ""} onChange={(e) => handleTimeChange(day, "startTime", e.target.value)} />
+                  </div>
+                  <div className="time-group">
+                    <label>End Time:</label>
+                    <input type="time" value={dayTimes[day]?.endTime || ""} onChange={(e) => handleTimeChange(day, "endTime", e.target.value)} />
+                  </div>
                 </div>
-                <div className="time-group">
-                  <label>End Time:</label>
-                  <input type="time" value={dayTimes[day]?.endTime || ""} onChange={(e) => handleTimeChange(day, "endTime", e.target.value)} />
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
+              ))}
+            </div>
 
-        {subtotal > 0 && (
-          <div className="invoice">
-            <h3>Invoice</h3>
-            <p>
-              <FontAwesomeIcon icon={faDollarSign} /> Subtotal: <strong>${subtotal.toFixed(2)}</strong>
-            </p>
-            <h3>
-              <FontAwesomeIcon icon={faCreditCard} /> Payment Information
-            </h3>
-            <div className="form-group">
-              <label>Card Number:</label>
-              <input type="text" name="cardNumber" value={paymentInfo.cardNumber} onChange={handlePaymentChange} />
+            <div className="invoice">
+              <h3>Invoice</h3>
+              <p>
+                <FontAwesomeIcon icon={faDollarSign} /> Subtotal: <strong>${subtotal.toFixed(2)}</strong>
+              </p>
+              <h3>
+                <FontAwesomeIcon icon={faCreditCard} /> Payment Information
+              </h3>
+              <div className="form-group">
+                <label>Card Number:</label>
+                <input type="text" name="cardNumber" value={paymentInfo.cardNumber} onChange={handlePaymentChange} />
+              </div>
+              <div className="form-group">
+                <label>Expiry Date:</label>
+                <input type="text" name="expiryDate" placeholder="MM/YY" value={paymentInfo.expiryDate} onChange={handlePaymentChange} />
+              </div>
+              <div className="form-group">
+                <label>CVV:</label>
+                <input type="text" name="cvv" value={paymentInfo.cvv} onChange={handlePaymentChange} />
+              </div>
+              <button onClick={handlePay} className="pay-button">
+                Pay
+              </button>
             </div>
-            <div className="form-group">
-              <label>Expiry Date:</label>
-              <input type="text" name="expiryDate" placeholder="MM/YY" value={paymentInfo.expiryDate} onChange={handlePaymentChange} />
-            </div>
-            <div className="form-group">
-              <label>CVV:</label>
-              <input type="text" name="cvv" value={paymentInfo.cvv} onChange={handlePaymentChange} />
-            </div>
-            <button onClick={handlePay} className="pay-button">
-              Pay
-            </button>
-          </div>
+          </>
         )}
       </div>
     </div>
