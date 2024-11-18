@@ -14,6 +14,6 @@ router.get('/user/:id', getUserProfile);
 
 // Add more routes here as needed
 router.put('/update/:id', updateUser);
-router.post('/add-service', addService);
+//router.post('/add-service', addService);
 
 module.exports = router;

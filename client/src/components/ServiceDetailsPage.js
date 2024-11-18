@@ -5,6 +5,7 @@ import "./ServiceDetailsPage.css";
 // Import Font Awesome
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowLeft, faMapMarkerAlt, faFileDownload, faLanguage, faCalendarAlt, faClock, faDollarSign, faCheckCircle, faCreditCard, faPerson } from "@fortawesome/free-solid-svg-icons";
+import CheckoutForm from "./checkoutForm";
 
 function ServiceDetailsPage() {
   const { serviceId } = useParams(); // Get the service ID from the URL parameters
@@ -208,30 +209,7 @@ function ServiceDetailsPage() {
         )}
 
         {subtotal > 0 && (
-          <div className="invoice">
-            <h3>Invoice</h3>
-            <p>
-              <FontAwesomeIcon icon={faDollarSign} /> Subtotal: <strong>${subtotal.toFixed(2)}</strong>
-            </p>
-            <h3>
-              <FontAwesomeIcon icon={faCreditCard} /> Payment Information
-            </h3>
-            <div className="form-group">
-              <label>Card Number:</label>
-              <input type="text" name="cardNumber" value={paymentInfo.cardNumber} onChange={handlePaymentChange} />
-            </div>
-            <div className="form-group">
-              <label>Expiry Date:</label>
-              <input type="text" name="expiryDate" placeholder="MM/YY" value={paymentInfo.expiryDate} onChange={handlePaymentChange} />
-            </div>
-            <div className="form-group">
-              <label>CVV:</label>
-              <input type="text" name="cvv" value={paymentInfo.cvv} onChange={handlePaymentChange} />
-            </div>
-            <button onClick={handlePay} className="pay-button">
-              Pay
-            </button>
-          </div>
+          <CheckoutForm subtotal={400} />
         )}
       </div>
     </div>

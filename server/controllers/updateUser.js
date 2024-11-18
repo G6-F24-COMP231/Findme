@@ -4,18 +4,21 @@ const User = require('../User');
 exports.updateUser = async (req, res) => {
     try {
         const userId = req.params.id;
-        const { username, password, mobileNumber, languages } = req.body;
+        const updates = req.body;
 
         const user = await User.findById(userId);
         if (!user) {
             return res.status(404).json({message: 'User not found'});
         }
 
-        if (username) user.username = username;
-        if (mobileNumber) user.mobileNumber = mobileNumber;
-        if (languages) user.languages = languages;
+        Object.keys(updates).forEach((key) => {
+        // if (key === 'password') {
+        //     return; // Skip password for now, handle it separately
+        // }
+        user[key] = updates[key];
+        });
 
-        if (password) {
+        if (updates.password) {
             const salt = await bcrypt.genSalt(10);
             user.password = await bcrypt.hash(password, salt);
         }
@@ -25,11 +28,19 @@ exports.updateUser = async (req, res) => {
         res.status(200).json({
             message: 'User updated successfully',
             user: {
+               _id: user._id,
                 username: user.username,
+                email: user.email,
                 mobileNumber: user.mobileNumber,
-                languages: user.languages,
                 userType: user.userType,
-                location: user.location
+                serviceType: user.serviceType,
+                serviceName: user.serviceName,
+                location: user.location,
+                availableDays: user.availableDays,
+                startTime: user.startTime,
+                endTime: user.endTime,
+                price: user.price,
+                languages: user.languages,
             },
         });
     } catch (error) {

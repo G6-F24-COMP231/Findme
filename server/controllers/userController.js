@@ -112,6 +112,17 @@ exports.loginUser = async (req, res) => {
         id: user._id,
         username: user.username,
         email: user.email,
+        mobileNumber: user.mobileNumber,
+        userType: user.userType,
+        serviceType: user.serviceType,
+        serviceName: user.serviceName,
+        location: user.location,
+        availableDays: user.availableDays,
+        startTime: user.startTime,
+        endTime: user.endTime,
+        price: user.price,
+        languages: user.languages,
+        resume: user.resume
       }  
          });
   } catch (error) {
@@ -119,3 +130,4 @@ exports.loginUser = async (req, res) => {
         res.status(500).json({ message: 'Server error', error });
     }
 }
+
