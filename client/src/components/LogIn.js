@@ -45,6 +45,7 @@ const Login = () => {
            });
         setMessage(response.data.message);
         setUser(response.data.user);
+        
         console.log(response.data.user)
         navigate('/');
       } catch (error) {

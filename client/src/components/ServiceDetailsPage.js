@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import "./ServiceDetailsPage.css";
+import axios from 'axios';
 
 // Import Font Awesome
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -9,7 +10,7 @@ import CheckoutForm from "./checkoutForm";
 
 function ServiceDetailsPage() {
   const { serviceId } = useParams(); // Get the service ID from the URL parameters
-  const {navigate} = useNavigate(); // Initialize navigate function
+  const navigate = useNavigate(); // Initialize navigate function
   const [serviceData, setServiceData] = useState(null); // State to store fetched service data
   const [selectedDays, setSelectedDays] = useState([]);
   const [dayTimes, setDayTimes] = useState({});
@@ -26,24 +27,35 @@ function ServiceDetailsPage() {
     // Simulate fetching data from backend
     const fetchServiceData = async () => {
       // Simulate an API call delay
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      //await new Promise((resolve) => setTimeout(resolve, 500));
 
       // Demo data
-      const demoData = {
-        id: serviceId,
-        title: "Baby Sitter",
-        providerFirstName: "John",
-        providerLastName: "Doe",
-        location: "New York, NY",
-        languages: ["English", "Spanish"],
-        availableDays: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
-        startTime: "09:00 AM",
-        endTime: "05:00 PM",
-        pricePerHour: 50,
-        resumeUrl: "resume.pdf",
-      };
+      // const demoData = {
+      //   id: serviceId,
+      //   title: "Baby Sitter",
+      //   providerFirstName: "John",
+      //   providerLastName: "Doe",
+      //   location: "New York, NY",
+      //   languages: ["English", "Spanish"],
+      //   availableDays: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+      //   startTime: "09:00 AM",
+      //   endTime: "05:00 PM",
+      //   pricePerHour: 50,
+      //   resumeUrl: "resume.pdf",
+      // };
 
-      setServiceData(demoData);
+      // setServiceData(demoData);
+
+      try {
+        console.log(serviceId);
+        const response = await axios.get(`http://localhost:5001/api/services/${serviceId}`);
+        console.log(response.data);
+        setServiceData(response.data);
+      } catch (error) {
+        console.error("Error fetching service data:", error);
+        alert("Failed to load service data.");
+      }
+  
     };
 
     fetchServiceData();
@@ -87,6 +99,9 @@ function ServiceDetailsPage() {
   };
 
   useEffect(() => {
+
+    if (!serviceData || !price) return;
+
     const totalHours = selectedDays.reduce((sum, day) => {
       const times = dayTimes[day];
       if (times && times.startTime && times.endTime) {
@@ -98,7 +113,7 @@ function ServiceDetailsPage() {
         return sum;
       }
     }, 0);
-    setSubtotal(totalHours * pricePerHour);
+    setSubtotal(totalHours * price);
   }, [selectedDays, dayTimes, pricePerHour]);
 
   const handlePaymentChange = (e) => {
@@ -118,7 +133,7 @@ function ServiceDetailsPage() {
     return <div>Loading...</div>;
   }
 
-  const { title, providerFirstName, providerLastName, location, languages, availableDays, startTime, endTime, resumeUrl } = serviceData;
+  const { title, username,/*providerFirstName, providerLastName,*/ location, languages, availableDays, startTime, endTime, resumeUrl, price } = serviceData;
 
   return (
     <div className="service-details">
@@ -130,14 +145,15 @@ function ServiceDetailsPage() {
         <div className="profile-header">
           <div className="profile-avatar">
             <span className="initials">
-              {providerFirstName.charAt(0)}
-              {providerLastName.charAt(0)}
+              {/* {providerFirstName.charAt(0)}
+              {providerLastName.charAt(0)} */}
+              {username.charAt(0)}
             </span>
           </div>
           <div className="profile-info">
             <h2>{title}</h2>
             <p className="service-type">
-              <FontAwesomeIcon icon={faPerson} /> {providerFirstName} {providerLastName}
+              <FontAwesomeIcon icon={faPerson} /> {username}{/*{providerFirstName} {providerLastName}*/}
             </p>
             <p className="location">
               <FontAwesomeIcon icon={faMapMarkerAlt} /> {location}
@@ -168,9 +184,12 @@ function ServiceDetailsPage() {
             <FontAwesomeIcon icon={faClock} /> <strong>End Time:</strong> {endTime}
           </p>
           <p>
-            <FontAwesomeIcon icon={faDollarSign} /> <strong>Price per Hour:</strong> ${pricePerHour}
+            <FontAwesomeIcon icon={faDollarSign} /> <strong>Price per Hour:</strong> ${price}
           </p>
         </div>
+        <Link to={'/review'} className="btn btn-primary mt-3">
+              Write a Review
+        </Link>
       </div>
 
       <div className="booking-form">

@@ -69,6 +69,7 @@ app.get('/api/services/search', async (req, res) => {
   }
 });
 
+
 app.post('/api/create-payment-intent', async (req, res) => {
   const { amount, currency } = req.body;
 
@@ -88,16 +89,45 @@ app.post('/api/create-payment-intent', async (req, res) => {
 });
 
 app.post('/api/add-service', async (req, res) => {
-  try {
-    const { serviceName, location, languages, availableDays, startTime, endTime, price } = req.body;
-    const newService = new Service({ serviceName, location, languages, availableDays, startTime, endTime, price });
 
-    await newService.save();
-    res.status(201).json({ message: 'Service added successfully' });
+app.post('/api/users/:id/services', async (req, res) => {
+
+  try {
+    const userId = req.params.id;
+    const { serviceName, location, languages, price, availableDays, startTime, endTime } = req.body;
+    //const newService = new User.services({ serviceName, location, languages, price, availableDays, startTime, endTime });
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    const newService = { serviceName, location, languages, price, availableDays, startTime, endTime };
+    user.services.push(newService);
+
+    await user.save();
+
+    
+    res.status(201).json({ message: 'Service added successfully', user });
   } catch (error) {
+    console.error('Error adding service:', error);
     res.status(500).json({ error: 'Failed to add service' });
   }
 });
+
+app.get('/api/services/:serviceId', async (req, res) => {
+  const { serviceId } = req.params;
+  try {
+    const service = await User.findById(serviceId); // Replace with your database query
+    if (!service) {
+      return res.status(404).json({ message: 'Service not found' });
+    }
+    res.json(service);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching service details', error });
+  }
+});
+
 
 app.use('/api', userRoutes);
 app.use('/api/services', userRoutes);
