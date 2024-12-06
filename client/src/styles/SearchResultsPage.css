@@ -1,0 +1,80 @@
+.service {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 16px;
+  margin: 16px;
+  width: calc(33% - 32px);
+  display: inline-block;
+  vertical-align: top;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s;
+}
+
+.service:hover {
+  transform: scale(1.05);
+}
+
+.service h3 {
+  font-size: 1.2rem;
+  margin: 0 0 8px;
+}
+
+.service p {
+  font-size: 1rem;
+  margin: 4px 0;
+}
+
+.service a {
+  display: inline-block;
+  margin-top: 12px;
+  padding: 10px 15px;
+  background-color: #007bff;
+  color: #fff;
+  text-decoration: none;
+  border-radius: 4px;
+}
+
+.service a:hover {
+  background-color: #0056b3;
+}
+
+/* SearchResultsPage.css */
+
+/* .search-results-page {
+  padding: 20px;
+} */
+
+.search-bar {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px; /* Add spacing below the search bar */
+}
+
+.search-bar input {
+  width: 300px;
+  padding: 8px;
+}
+
+.search-bar select {
+  padding: 8px;
+}
+
+.results-container {
+  margin-top: 20px;
+}
+
+.result-item {
+  border: 1px solid #ddd;
+  padding: 15px;
+  margin-bottom: 15px;
+  border-radius: 5px;
+  background-color: #f9f9f9;
+}
+
+.result-item h3 {
+  margin: 0 0 5px 0;
+}
+
+.result-item p {
+  margin: 5px 0;
+}

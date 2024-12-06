@@ -1,0 +1,299 @@
+/* Global Styles */
+body {
+  margin: 0;
+  font-family: "Poppins", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f5f7fa;
+}
+
+.service-details {
+  margin: 0px auto;
+  background-color: #fff;
+  overflow: auto;
+  max-height: 100vh;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-gap: 20px;
+  position: relative;
+}
+
+.stars {
+  color: #FFD700; /* Gold color for stars */
+  font-size: 1.2em;
+}
+
+.rating .stars {
+  margin-bottom: 0.5em;
+}
+
+/* Back Icon Styles */
+.back-icon {
+  position: absolute;
+  top: 10px;
+  left: 20px;
+  font-size: 18px;
+  color: #007bff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+
+.back-icon:hover {
+  text-decoration: underline;
+}
+
+.back-icon svg {
+  margin-right: 5px;
+}
+
+.profile-section {
+  height: 100vh;
+  background-color: #ffffff;
+  color: #333333;
+  border-radius: 15px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  padding: 40px;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+.profile-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+.profile-avatar {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background-color: #007bff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 30px;
+}
+
+.initials {
+  color: #ffffff;
+  font-size: 48px;
+  font-weight: bold;
+}
+.profile-info h2 {
+  font-size: 32px;
+  margin-bottom: 10px;
+}
+
+.service-type,
+.location {
+  font-size: 18px;
+  color: #777777;
+  margin: 5px 0;
+}
+
+.download-resume {
+  display: inline-block;
+  margin-bottom: 30px;
+  text-decoration: none;
+  color: #ffffff;
+  font-weight: bold;
+  background-color: #007bff;
+  padding: 12px 25px;
+  border-radius: 30px;
+  transition: background-color 0.3s ease;
+}
+
+.download-resume:hover {
+  background-color: #0056b3;
+}
+
+.profile-details p {
+  font-size: 18px;
+  margin: 15px 0;
+}
+
+.profile-details strong {
+  color: #333333;
+}
+
+.days {
+  display: flex;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+.day {
+  margin: 5px;
+  padding: 10px 16px;
+  background-color: #f1f1f1;
+  color: #333333;
+  border-radius: 20px;
+  font-size: 14px;
+}
+/* Booking Form */
+.booking-form {
+  background-color: #fff;
+  border-radius: 15px;
+  padding: 40px;
+  height: 100vh;
+  overflow-y: auto;
+}
+
+.booking-form h3 {
+  font-size: 28px;
+  margin-bottom: 20px;
+  color: #007bff;
+}
+
+.form-group {
+  margin-bottom: 25px;
+}
+
+.form-group label {
+  display: block;
+  font-size: 18px;
+  margin-bottom: 10px;
+  color: #555555;
+}
+
+.days-select {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.checkbox-label {
+  position: relative;
+  margin-right: 15px;
+  margin-bottom: 15px;
+  cursor: pointer;
+  font-size: 16px;
+  color: #333333;
+}
+
+.checkbox-label input {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.custom-checkbox {
+  position: relative;
+  top: 2px;
+  margin-right: 8px;
+  font-size: 18px;
+  color: #cccccc;
+  transition: color 0.2s;
+}
+
+.checkbox-label input:checked ~ .custom-checkbox {
+  color: #28a745;
+}
+
+.time-inputs {
+  margin-bottom: 30px;
+}
+
+.time-selection {
+  background-color: #f8f9fa;
+  padding: 20px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+}
+
+.time-selection h4 {
+  font-size: 22px;
+  margin-bottom: 15px;
+  color: #555555;
+}
+
+.time-group {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 15px;
+}
+
+.time-group label {
+  font-size: 16px;
+  margin-bottom: 5px;
+  color: #777777;
+}
+
+.time-group input {
+  padding: 10px;
+  font-size: 16px;
+  border: 1px solid #dddddd;
+  border-radius: 5px;
+}
+
+.invoice {
+  background-color: #f8f9fa;
+  padding: 30px;
+  border-radius: 10px;
+}
+
+.invoice h3 {
+  font-size: 24px;
+  margin-bottom: 20px;
+  color: #007bff;
+}
+
+.invoice p {
+  font-size: 20px;
+  margin-bottom: 15px;
+  color: #333333;
+}
+
+.pay-button {
+  padding: 15px 40px;
+  font-size: 20px;
+  cursor: pointer;
+  background-color: #28a745;
+  color: #ffffff;
+  border: none;
+  border-radius: 50px;
+  transition: background-color 0.3s ease;
+
+  margin-bottom: 20px;
+}
+
+.pay-button:hover {
+  background-color: #218838;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 12px;
+  font-size: 16px;
+  border: 1px solid #dddddd;
+  border-radius: 5px;
+  margin-top: 5px;
+}
+
+.form-group input:focus {
+  border-color: #007bff;
+  outline: none;
+}
+
+@media (max-width: 768px) {
+  .service-details {
+    height: auto;
+    grid-template-columns: 1fr;
+  }
+  .profile-header {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .profile-avatar {
+    margin-right: 0;
+    margin-bottom: 20px;
+  }
+
+  .profile-info h2 {
+    text-align: center;
+  }
+
+  .service-type,
+  .location {
+    text-align: center;
+  }
+}
